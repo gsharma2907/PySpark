@@ -18,6 +18,8 @@ customerDF = glueContext.create_dynamic_frame.from_catalog(
 salesDF.printSchema()
 customerDF.printSchema()
 
+# Lets Join the two dynamic frames
+
 customersalesDF=Join.apply(salesDF, customerDF, 'customerid', 'customerid')
 customersalesDF.printSchema()
 
@@ -25,6 +27,7 @@ customersalesDF.printSchema()
 # You can see two columns customerid and .customerid due to join on the key. You can use drop_fields method to remove .customerid field.
 
 customersalesDF = customersalesDF.drop_fields(['`.customerid`'])
+
 customersalesDF.printSchema()
 
 # Write to S3

@@ -1,0 +1,32 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+
+glueContext = GlueContext(SparkContext.getOrCreate())
+
+salesDF = glueContext.create_dynamic_frame.from_catalog(
+             database="dojodatabase",
+             table_name="sales")
+customerDF = glueContext.create_dynamic_frame.from_catalog(
+             database="dojodatabase",
+             table_name="customers")
+             
+ 
+salesDF.printSchema()
+customerDF.printSchema()
+
+customersalesDF=Join.apply(salesDF, customerDF, 'customerid', 'customerid')
+customersalesDF.printSchema()
+
+
+# You can see two columns customerid and .customerid due to join on the key. You can use drop_fields method to remove .customerid field.
+
+customersalesDF = customersalesDF.drop_fields(['`.customerid`'])
+customersalesDF.printSchema()
+
+# Write to S3
+
+glueContext.write_dynamic_frame.from_options(customersalesDF, connection_type = "s3", connection_options = {"path": "s3://bucket_location/data/customersales"}, format = "json")

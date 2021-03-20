@@ -30,3 +30,6 @@ customersalesDF.printSchema()
 # Write to S3
 
 glueContext.write_dynamic_frame.from_options(customersalesDF, connection_type = "s3", connection_options = {"path": "s3://bucket_location/data/customersales"}, format = "json")
+
+
+

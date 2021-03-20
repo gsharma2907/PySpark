@@ -7,12 +7,10 @@ from awsglue.job import Job
 
 glueContext = GlueContext(SparkContext.getOrCreate())
 
-salesDF = glueContext.create_dynamic_frame.from_catalog(
-             database="dojodatabase",
-             table_name="sales")
-customerDF = glueContext.create_dynamic_frame.from_catalog(
-             database="dojodatabase",
-             table_name="customers")
+# Lets create the two dynamic frames for two tables from S3
+
+salesDF = glueContext.create_dynamic_frame.from_catalog(database="dojodatabase", table_name="sales")
+customerDF = glueContext.create_dynamic_frame.from_catalog(database="dojodatabase", table_name="customers")
              
  
 salesDF.printSchema()

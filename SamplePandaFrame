@@ -1,0 +1,51 @@
+import os
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+
+from io import StringIO
+import pandas as pd
+import boto3
+from pyspark.sql.types import *
+
+
+### SCRIPT HEADER ###
+args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+
+sc = SparkContext()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+job.init(args['JOB_NAME'], args)
+
+logger = glueContext.get_logger()
+logger.info('logger start')
+print('start')
+### /SCRIPT HEADER ###
+
+d = {'col1': ['string value1', 'string value2'], 'col2': [1, 100000]}
+df = pd.DataFrame(data=d)
+logger.info(str(df))
+
+bucket = 'gp-memsql-s3-bucket-qa'
+csv_buffer = StringIO()
+df.to_csv(csv_buffer, index=False)
+s3_resource = boto3.resource('s3')
+s3_resource.Object(bucket, 'daas/df.csv').put(Body=csv_buffer.getvalue())
+
+struct = StructType([ \
+    StructField("col1",StringType(),True), \
+    StructField("col2",ShortType(),True)
+  ])
+  
+df = spark.read.format('csv').schema(struct).options(header='true',sep =',' , quote='"',multiLine = 'true').load('s3://glue-etl-practice/sample/df.csv')
+print(df.show())
+
+### SCRIPT END ###
+print('end')
+logger.info("logger end")
+job.commit()
+### / SCRIPT END ###
